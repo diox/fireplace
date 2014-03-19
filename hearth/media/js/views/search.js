@@ -123,6 +123,19 @@ define('views/search',
         return $('#search-results, #account-settings .listing').length;
     }
 
+    function loadVisibleIcons() {
+        var number_of_icons_to_show = capabilities.widescreen() ? 7 : 3;
+
+        $('img.icon[data-src]:not([src])').each(function(index, item) {
+            // All icons should load except the few extra featured ones
+            // on the homepage that the user can't see.
+            if (!$(item).hasClass('featured-icon') || !z.context.is_homepage ||
+                index + 1 <= number_of_icons_to_show) { // index starts at 0
+                this.src = $(this).data('src');
+            }
+        });
+    }
+
     z.body.on('click', '.expand-toggle', _pd(function() {
         setTrays(expand = !expand);
 
@@ -158,6 +171,8 @@ define('views/search',
         if (isSearchPage()) {
             setTrays(expand);
         }
+        // Load visible icons now that everything else is loaded.
+        loadVisibleIcons();
     }).on('reloaded_chrome', function() {
         if (isSearchPage()) {
             setTrays(expand);
@@ -176,6 +191,9 @@ define('views/search',
             ]
         );
     });
+
+    // If the window is resized, load additional icons if necessary.
+    z.doc.on('saferesize', loadVisibleIcons);
 
     function processor(query) {
         query = query ? query.toLowerCase() : '';

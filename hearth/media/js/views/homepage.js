@@ -17,6 +17,7 @@ define('views/homepage',
         builder.z('title', '');  // We don't want a title on the homepage.
 
         builder.z('type', 'root');
+        builder.z('is_homepage', true);
         builder.z('search', params.name);
         builder.z('title', params.name);
 
