@@ -190,13 +190,13 @@ function(_) {
 
     var ImageDeferrer = require('image-deferrer');
     var iconDeferrer = ImageDeferrer.Deferrer(100, null);
-    var screenshotDeferrer = ImageDeferrer.Deferrer(null, 200);
+    var thubmnailsDeferrer = ImageDeferrer.Deferrer(null, 200);
     z.page.one('loaded', function() {
         iconDeferrer.setImages($('.icon.deferred'));
-        screenshotDeferrer.setImages($('.screenshot img.deferred'));
+        thubmnailsDeferrer.setImages($('.screenshot img.deferred'));
     }).on('loaded loaded_more navigate fragment_loaded', function() {
         iconDeferrer.refresh();
-        screenshotDeferrer.refresh();
+        thubmnailsDeferrer.refresh();
     });
     require('nunjucks').require('globals').imgAlreadyDeferred = function(src) {
         /*
@@ -207,8 +207,8 @@ function(_) {
             switching between the New and Popular tabs on the home page.
         */
         var iconsLoaded = iconDeferrer.getSrcsAlreadyLoaded();
-        var screenshotsLoaded = screenshotDeferrer.getSrcsAlreadyLoaded();
-        var loaded = iconsLoaded.concat(screenshotsLoaded);
+        var thumbnailsLoaded = thubmnailsDeferrer.getSrcsAlreadyLoaded();
+        var loaded = iconsLoaded.concat(thumbnailsLoaded);
         return loaded.indexOf(src) !== -1;
     };
 

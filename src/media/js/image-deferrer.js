@@ -15,15 +15,11 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
                 y: 0
             };
         }
-        var xy = {
-            x: elem.offsetLeft,
-            y: elem.offsetTop
+        var rect = elem.getBoundingClientRect();
+        return {
+            x: rect.left,
+            y: rect.top
         };
-        var par = getXYPos(elem.offsetParent);
-        for (var key in par) {
-            xy[key] += par[key];
-        }
-        return xy;
     }
 
     function getScrollOffsets(w) {
@@ -85,24 +81,33 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
         }
 
         // Defer image loading.
-        z.win.on('scroll resize', scrollListener);
+        z.win.on('scroll resize image_defer', scrollListener);
 
-        function loadImages() {
+        var loadImages = function() {
             // Calculate viewport loading boundaries (vertical).
-            var yOffset = getScrollOffsets().y;
-            var viewportHeight = z.win.height();
-            var minY = yOffset - viewportHeight * 0.5;  // 0.5 viewport(s) back.
-            minY = minY < 0 ? 0 : minY;
-            var maxY = yOffset + viewportHeight * 1.5;  // 1.5 viewport(s) ahead.
+            var offsets = getScrollOffsets();
+            var viewport = {
+                h: z.win.height(),
+                w: z.win.width()
+            };
+            var min = {
+                x: offsets.x - viewport.w * 1,   // 1 viewport(s) back horizontally.
+                y: offsets.y - viewport.h * 0.5 // 0.5 viewport(s) back vertically.
+            };
+            var max = {
+                x: offsets.x + viewport.w * 1,  // 1 viewport(s) ahead horizontally.
+                y: offsets.y + viewport.h * 1.5  // 1.5 viewport(s) ahead vertically.
+            };
 
             // If images are within viewport loading boundaries, load it.
             var imagesLoading = 0;
             var imagesLoaded = 0;
             var imagesNotLoaded = [];
             $images.each(function(i, img) {
-                var y = getXYPos(img).y;
+                var pos = getXYPos(img);
 
-                if (y > minY && y < maxY) {
+                if (pos.y > min.y && pos.y < max.y &&
+                    pos.x > min.x && pos.x < max.x) {
                     // Load image via clone + replace. It's slower, but it
                     // looks visually smoother than changing the image's
                     // class/src in place.
@@ -111,6 +116,7 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
 
                     var replace = img.cloneNode(false);
                     replace.classList.remove('deferred');
+                    replace.style.backgroundImage = 'none';
                     replace.onload = function() {
                         // Once the replace has loaded, swap and fade in.
                         if (img.parentNode === null) {
@@ -142,7 +148,7 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
 
             // Don't loop over already loaded images.
             $images = $(imagesNotLoaded);
-        }
+        };
 
         var setImages = function($newImages) {
             /* Sets the deferrer's set of images to loop over and render. */
@@ -181,6 +187,7 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
         return {
             clear: clear,
             refresh: refresh,
+            selector: selector,
             setImages: setImages,
             getSrcsAlreadyLoaded: getSrcsAlreadyLoaded
         };

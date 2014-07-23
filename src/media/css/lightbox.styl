@@ -98,6 +98,16 @@
         right: 0;
         top: 0;
     }
+    .deferred {
+        /* deferred images take the full size and use the background instead of
+           src to show the rocket image in order to try to avoid having
+           coordinates completely out of whack when the image is replaced by
+           the real one */
+        background-position: center center;
+        background-repeat: no-repeat;
+        height: 100%;
+        width: 100%;
+    }
     .err {
         font-size: 100px;
         max-height: 80px;
