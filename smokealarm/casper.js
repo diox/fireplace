@@ -199,6 +199,10 @@ function Suite(options) {
         console.log(JSON.stringify(cobj.getElementInfo(selector)), null, ' ');
     };
 
+    this.wait = function(t) {
+        return cobj.wait(t);
+    };
+
 }
 
 exports.suite = function(options) {

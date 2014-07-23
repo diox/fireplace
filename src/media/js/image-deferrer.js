@@ -7,23 +7,24 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
     */
     function getXYPos(elem) {
         /*
-            Return X/Y position of an element within the page (recursive).
+            Return X/Y position of an element within the page.
+            Uses `getBoundingClientRect()`, which works even if the element has
+            transform applied on it or on one of its parents.
         */
         if (!elem) {
-            return {
-                x: 0,
-                y: 0
-            };
+            // No element, no position.
+            return null;
         }
-        var xy = {
-            x: elem.offsetLeft,
-            y: elem.offsetTop
+        var rect = elem.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) {
+            // Image has no dimensions, it's not visible, don't return a position.
+            return null;
+        }
+        var scroll = getScrollOffsets();
+        return {
+            x: rect.left + scroll.x,
+            y: rect.top + scroll.y
         };
-        var par = getXYPos(elem.offsetParent);
-        for (var key in par) {
-            xy[key] += par[key];
-        }
-        return xy;
     }
 
     function getScrollOffsets(w) {
@@ -32,26 +33,9 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
            an object
         */
         w = w || window;
-
-        // This works for all browsers except IE versions 8 and before
-        if (w.pageXOffset !== null) {
-            return {
-                x: w.pageXOffset,
-                y: w.pageYOffset
-            };
-        }
-        // For IE (or any browser) in Standards mode
-        var d = w.document;
-        if (document.compatMode == 'CSS1Compat') {
-            return {
-                x: d.documentElement.scrollLeft,
-                y: d.documentElement.scrollTop
-            };
-        }
-        // For browsers in Quirks mode
         return {
-            x: d.body.scrollLeft,
-            y: d.body.scrollTop
+            x: w.pageXOffset,
+            y: w.pageYOffset
         };
     }
 
@@ -74,7 +58,7 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
 
         var scrollListener = function(e) {
             if (!$images) {
-               return;
+                return;
             }
             loadImages();
         };
@@ -85,24 +69,32 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
         }
 
         // Defer image loading.
-        z.win.on('scroll resize', scrollListener);
+        z.win.on('scroll resize image_defer', scrollListener);
 
-        function loadImages() {
+        var loadImages = function() {
             // Calculate viewport loading boundaries (vertical).
-            var yOffset = getScrollOffsets().y;
-            var viewportHeight = z.win.height();
-            var minY = yOffset - viewportHeight * 0.5;  // 0.5 viewport(s) back.
-            minY = minY < 0 ? 0 : minY;
-            var maxY = yOffset + viewportHeight * 1.5;  // 1.5 viewport(s) ahead.
+            var offsets = getScrollOffsets();
+            var viewport = {
+                h: z.win.height(),
+                w: z.win.width()
+            };
+            var min = {
+                x: offsets.x - viewport.w * 1,  // 1 viewport(s) back horizontally.
+                y: offsets.y - viewport.h * 0.5  // 0.5 viewport(s) back vertically.
+            };
+            var max = {
+                x: offsets.x + viewport.w * 1,  // 1 viewport(s) ahead horizontally.
+                y: offsets.y + viewport.h * 1.5  // 1.5 viewport(s) ahead vertically.
+            };
 
             // If images are within viewport loading boundaries, load it.
             var imagesLoading = 0;
             var imagesLoaded = 0;
             var imagesNotLoaded = [];
             $images.each(function(i, img) {
-                var y = getXYPos(img).y;
-
-                if (y > minY && y < maxY) {
+                var pos = getXYPos(img);
+                if (pos && pos.y > min.y && pos.y < max.y &&
+                    pos.x > min.x && pos.x < max.x) {
                     // Load image via clone + replace. It's slower, but it
                     // looks visually smoother than changing the image's
                     // class/src in place.
@@ -111,6 +103,7 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
 
                     var replace = img.cloneNode(false);
                     replace.classList.remove('deferred');
+                    replace.style.backgroundImage = 'none';
                     replace.onload = function() {
                         // Once the replace has loaded, swap and fade in.
                         if (img.parentNode === null) {
@@ -142,7 +135,7 @@ define('image-deferrer', ['underscore', 'urls', 'z'], function(_, urls, z) {
 
             // Don't loop over already loaded images.
             $images = $(imagesNotLoaded);
-        }
+        };
 
         var setImages = function($newImages) {
             /* Sets the deferrer's set of images to loop over and render. */

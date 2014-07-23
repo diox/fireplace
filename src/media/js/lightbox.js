@@ -1,6 +1,6 @@
 define('lightbox',
-    ['keys', 'models', 'navigation', 'utils', 'shothandles', 'tracking', 'underscore', 'z'],
-    function(keys, models, navigation, utils, handles, tracking, _, z) {
+    ['flipsnap', 'image-deferrer', 'jquery', 'keys', 'models', 'navigation', 'utils', 'shothandles', 'tracking', 'underscore', 'urls', 'z'],
+    function(Flipsnap, ImageDeferrer, $, keys, models, navigation, utils, handles, tracking, _, urls, z) {
 
     var $lightbox = $(document.getElementById('lightbox'));
     var $section = $lightbox.find('section');
@@ -8,6 +8,7 @@ define('lightbox',
     var currentApp;
     var previews;
     var slider;
+    var previewsDeferrer = ImageDeferrer.Deferrer(null, 200);
 
     $lightbox.addClass('shots');
 
@@ -78,13 +79,15 @@ define('lightbox',
     });
 
     function renderPreviews() {
+        var $sliderElm;
+
         // Clear out the existing content.
         $content.empty();
+        previewsDeferrer.clear();
 
         // Place in a pane for each image/video with a 'loading' placeholder.
         _.each(previews, function(p) {
-            var $el = $('<li class="loading"><span class="throbber">');
-            $content.append($el);
+            var $el = $('<li class="loading">');
 
             // Let's fail elegantly when our images don't load.
             // Videos on the other hand will always be injected.
@@ -95,28 +98,37 @@ define('lightbox',
                 $el.removeClass('loading');
                 $el.append(v);
             } else {
-                var i = new Image();
-
-                i.onload = function() {
-                    $el.removeClass('loading');
-                    $el.append(i);
-                };
-                i.onerror = function() {
-                    $el.removeClass('loading');
-                    $el.append('<b class="err">&#x26A0;</b>');
-                };
-
-                // Attempt to load the image.
-                i.src = p.image_url;
+                var i = $('<img>');
+                i.addClass('deferred');
+                // Set data-src through attr() cause image-deferrer uses
+                // getAttribute().
+                i.attr('data-src', p.image_url);
+                i.prop('src', urls.media('fireplace/img/grain.png'));
+                i.css('background-image', 'url(' + urls.media('fireplace/img/pretty/rocket.png') + ')');
+                $el.removeClass('loading');
+                $el.append(i);
             }
+            $content.append($el);
         });
 
         // $section doesn't have its proper width until after a paint.
         if ($content.length) {
             slider = Flipsnap($content[0]);
-            slider.element.addEventListener('fsmoveend', pauseVideos, false);
+            $sliderElm = $(slider.element);
+            $sliderElm.on('fsmoveend', pauseVideos);
             handles.attachHandles(slider, $section);
+
+            previewsDeferrer.setImages($content.find('img'));
+            // Recalculate which images to show when we moved from one point
+            // to another in the slider. We can't use flipsnap event directly,
+            // because it fires too early, before the transform has been fully
+            // applied, causing the coordinates calculations to be wrong.
+            $sliderElm.on('transitionend webkitTransitionEnd', triggerImages);
         }
+    }
+
+    function triggerImages() {
+        z.win.trigger('image_defer');
     }
 
     function resize() {
@@ -145,7 +157,7 @@ define('lightbox',
             $lightbox.hide();
         }, 500);
         if (slider && slider.element) {
-            slider.element.removeEventListener('fsmoveend', pauseVideos);
+            $(slider.element).off(); // remove all event handlers.
             slider.destroy();
             slider = null;
         }
