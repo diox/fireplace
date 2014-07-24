@@ -11,9 +11,7 @@ define('login',
     function signInNotification() {
         notification.notification({message: gettext('You have been signed in')});
     }
-    if (capabilities.fallbackFxA()) {
-        z.body.addClass('persona-loaded');
-    }
+
     z.body.on('click', '.persona', function(e) {
         e.preventDefault();
 
@@ -32,7 +30,7 @@ define('login',
             z.body.removeClass('logged-in');
             z.page.trigger('reload_chrome').trigger('before_logout');
 
-            if (capabilities.persona()) {
+            if (capabilities.navigatorId()) {
                 console.log('Triggering Persona logout');
                 navigator.id.logout();
             }
@@ -118,9 +116,9 @@ define('login',
                         'width=' + w + ',height=' + h + ',left=' + i[0] + ',top=' + i[1]);
         } else {
             persona_loaded.done(function() {
-                if (capabilities.persona()) {
+                if (capabilities.navigatorId()) {
                     console.log('Requesting login from Persona');
-                    if (capabilities.nativeFxA()) {
+                    if (capabilities.firefoxAccounts()) {
                         navigator.id.request({oncancel: opt.oncancel});
                     } else {
                         navigator.id.request(opt);
@@ -198,20 +196,20 @@ define('login',
 
     var GET = utils.getVars();
 
-    var persona_shim_included = $('script[src="' + settings.persona_shim_url + '"]').length;
-
-    // If for some reason Zamboni got `?nativepersona=true` but we actually
-    // don't have native Persona, then let's inject a script to load the shim.
-    if (!persona_shim_included && !capabilities.persona()) {
+    // If we haven't got navigator.id/mozId and the shim is not included, then
+    // we need to inject a script to load the shim.
+    if (!capabilities.navigatorId() &&
+        !$('script[src="' + settings.persona_shim_url + '"]').length) {
         var s = document.createElement('script');
         s.async = true;
         s.src = settings.persona_shim_url;
         document.body.appendChild(s);
     }
 
+    // Wait for navigator.id/mozId to be present.
     var persona_interval = setInterval(function() {
         persona_loading_time = +(new Date()) - persona_loading_start;
-        if (capabilities.persona()) {
+        if (capabilities.navigatorId()) {
             console.log('Persona loaded (' + persona_loading_time / 1000 + 's)');
             persona_def.resolve();
             clearInterval(persona_interval);
@@ -233,7 +231,7 @@ define('login',
             console.log('No previous user detected');
         }
 
-        if (capabilities.persona()) {
+        if (capabilities.navigatorId()) {
             console.log('Calling navigator.id.watch');
             opts = {
                 loggedInUser: email,
@@ -244,7 +242,7 @@ define('login',
                     z.page.trigger('reload_chrome').trigger('logout');
                 }
             };
-            if (capabilities.nativeFxA()) {
+            if (capabilities.firefoxAccounts()) {
                 opts.wantIssuer = 'firefox-accounts';
             }
             navigator.id.watch(opts);
