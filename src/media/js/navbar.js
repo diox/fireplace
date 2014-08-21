@@ -1,8 +1,8 @@
 define('navbar',
     ['categories', 'jquery', 'jquery.hammer', 'log', 'navigation', 'nunjucks',
-     'settings', 'underscore', 'urls', 'z'],
+     'settings', 'storage', 'underscore', 'urls', 'z'],
     function(cats, $, hammer, log, navigation, nunjucks,
-             settings, _, urls, z) {
+             settings, storage, _, urls, z) {
     'use strict';
 
     var console = log('navbar');
@@ -114,6 +114,21 @@ define('navbar',
             $(this).removeClass('active');
         }).on('click', '.account-links a', function() {
             $('.account-links, .settings, .act-tray').removeClass('active');
+        });
+
+        // Check the right radio button depending on device_filtering being
+        // active (the default if the pref is missing) or not.
+        if (storage.getItem('device_filtering') === false) {
+            $('.device_filtering[value="0"]').prop('checked', true);
+        } else {
+            $('.device_filtering[value="1"]').prop('checked', true);
+        }
+
+        $('.device_filtering').on('change', function() {
+            var value = this.value === '1';
+            storage.setItem('device_filtering', value);
+            console.log('Device filtering was toggled to ' + value + ', reloading');
+            require('views').reload();
         });
     }
     initActTray();

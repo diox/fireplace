@@ -1,19 +1,26 @@
 {% macro act_tray(mobile, is_settings) %}
   <div class="act-tray{% if mobile %} mobile{% endif%}{% if mobile and not is_settings %} active{% endif %}">
     <a{% if not mobile %} href="{{ url('settings') }}"{% endif %} class="header-button icon settings" title="{{ _('Settings') }}"></a>
-    <div class="account-links only-logged-in">
+    <div class="account-links">
       <ul>
-        <li>
+        <li class="only-logged-out"><a href="#" class="persona">{{ _('Sign In') }}</a></li>
+        <li class="only-logged-in">
           <a href="{{ url('settings') }}">
             <b>{{ user.get_setting('email') }}</b>
             {{ _('Edit Account Settings') }}</a>
         </li>
-        <li><a href="{{ url('purchases') }}">{{ _('My Apps') }}</a></li>
+        <li class="only-logged-in"><a href="{{ url('purchases') }}">{{ _('My Apps') }}</a></li>
         {% if user.get_permission('developer') %}
           <li><a href="/developers/submissions">{{ _('My Submissions') }}</a></li>
         {% endif %}
         <li><a class="submit-feedback" href="#">{{ _('Feedback') }}</a></li>
-        <li><a href="#" class="logout">{{ _('Sign Out') }}</a></li>
+        {% if not mobile %}
+          <li class="last-if-logged-out"><span>{{ _('Show apps for:') }}</span> <!-- FIXME: hide on non-desktop, we don't want that on android, even tablets! -->
+            <label><input type="radio" name="device_filtering" class="device_filtering" value="0">{{ _('All devices')}}</label>
+            <label><input type="radio" name="device_filtering" class="device_filtering" value="1">{{ _('Desktop only')}}</label>
+          </li>
+        {% endif %}
+        <li class="only-logged-in last-if-logged-in"><a href="#" class="logout">{{ _('Sign Out') }}</a></li>
       </ul>
     </div>
   </div>

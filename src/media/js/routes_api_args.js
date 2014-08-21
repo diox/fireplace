@@ -11,6 +11,9 @@ define('routes_api_args',
     } else if (caps.firefoxAndroid) {
         _dev = 'android';
         _device = caps.widescreen() ? 'tablet' : 'mobile';
+    } else {
+        // "_device" is useless on desktop and can stay null.
+        _dev = 'desktop';
     }
 
     if (_device == 'mobile' || _device == 'firefoxos') {
@@ -23,7 +26,7 @@ define('routes_api_args',
             lang: (navigator.l10n && navigator.l10n.language) || navigator.language || navigator.userLanguage,
             region: user_helpers.region(undefined, true),
             carrier: user_helpers.carrier(),
-            dev: _dev,
+            dev: user_helpers.dev(_dev),
             device: _device,
             limit: _limit,
             pro: buckets.profile

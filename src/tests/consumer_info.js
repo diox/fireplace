@@ -43,6 +43,7 @@ test('consumer_info automatically set region and switches when required', functi
             user: {logged_in: function() { return false; }},
             settings: settings,
             user_helpers: {
+                dev: function(x) { return x; },
                 region: function(x, y) { return ''; },
                 carrier: function() { return ''; },
                 set_region_geoip: function(r) { geoip_region = r; }
@@ -58,7 +59,8 @@ test('consumer_info automatically set region and switches when required', functi
                 contains(settings.switches, 'dummy-switch');
                 done();
             });
-        }
+        },
+        fail
     );
 });
 
@@ -70,6 +72,7 @@ test('consumer_info automatically does not reset region if already present', fun
             requests: {get: mockConsumerInfoRequestSuccess({region: 'nowhere'})},
             user: {logged_in: function() { return false; }},
             user_helpers: {
+                dev: function(x) { return x; },
                 region: function(x, y) { return 'previous_region'; },
                 carrier: function() { return ''; },
                 set_region_geoip: function(r) { geoip_region = r; }
@@ -82,7 +85,8 @@ test('consumer_info automatically does not reset region if already present', fun
                 eq_(geoip_region, null);
                 done();
             });
-        }
+        },
+        fail
     );
 });
 
@@ -93,6 +97,7 @@ test('consumer_info automatically sets region to restofworld if API call fails',
         {
             requests: {get: mockConsumerInfoRequestFailure()},
             user_helpers: {
+                dev: function(x) { return x; },
                 region: function(x, y) { return ''; },
                 carrier: function() { return ''; },
                 set_region_geoip: function(r) { geoip_region = r; }
@@ -104,7 +109,8 @@ test('consumer_info automatically sets region to restofworld if API call fails',
                 eq_(geoip_region, 'restofworld');
                 done();
             });
-        }
+        },
+        fail
     );
 });
 

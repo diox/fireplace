@@ -85,36 +85,82 @@
 }
 
 .account-links {
-    cursor: pointer;
+    background: $white;
+    border: 1px solid #42cafe;
+    border-radius: 5px;
+    box-shadow: 0 2px 1px -1px #42cafe;  // Bottom box-shadow.
     position: absolute;
     right: -15px;
-    top: 49px;
+    top: 51px;
     width: 320px;
     z-index: 21;
 
+    /* :before/:after form the white arrow on top of the dropdown, with a blue outline */
+    &:before, &:after {
+        border: solid transparent;
+        bottom: 100%;
+        content: " ";
+        height: 0;
+        position: absolute;
+        right: 18px;
+        width: 0;
+    }
+
+    &:after {
+        border-bottom-color: #fff;
+        border-width: 13px;
+        right: 20px;
+    }
+
+    &:before {
+        border-bottom-color: #42cafe;
+        border-width: 15px;
+    }
+
     ul {
-        background: $grey-gardens-gray;
         line-height: 20px;
         list-style-type: none;
+        padding: 10px 0;
     }
     li {
         position: relative;
+        top: 1px;
 
-        + li {
-            border-top: 1px solid $cloud-gray;
+        &:after {
+            border-bottom: 1px solid $cloud-gray;
+            content: "";
+            display: block;
+            margin: 0 20px;
         }
-        a {
-            color: $cement-gray;
+
+        body.logged-in &.last-if-logged-in:after,
+        body:not(.logged-in) &.last-if-logged-out:after {
+            display: none;
+        }
+
+        a, label, span {
+            color: $medium-gray;
             display: block;
             font-size: 15px;
-            font-weight: 400;
-            padding: 10px 15px;
+            font-weight: 500;
+            margin: -1px 0 -1px 0; /* to hide the border on the <li> on hover */
+            padding: 11px 20px;    /* +1px top/bottom to compensate for the negative margin */
+            position: relative;
             text-decoration: none;
-
-            &:hover {
-                background-color: $sailor-blue;
-                color: #fff;
-            }
+            vertical-align: middle;
+        }
+        a:hover, label:hover {
+            background-color: #42cafe;
+            color: $white;
+        }
+        span {
+            cursor: default;
+        }
+        label {
+            font-weight: 400;
+        }
+        input {
+            margin: 0 5px 1px 0;
         }
     }
     a b {
@@ -240,29 +286,28 @@
             background-image: url(../img/pretty/back_arrow_active.svg);
         }
     }
-    // 'Sign In'
-    &.persona {
-        cursor: wait;
-        display: none;
-        margin-left: 15px;
-        word-break: keep-all;
-        word-wrap: normal;
-
-        &.loading-submit {
-            hidetext();
-            outline: 0;
-            spinner('loading');
-            margin-left: 15px;
-            width: 50px;
-            &:after {
-                display: none;
-            }
-        }
-    }
 }
 
-.persona-loaded .header-button.persona {
+.persona-loaded .persona {
     cursor: pointer;
+}
+
+// 'Sign In'
+.persona {
+    cursor: wait;
+    word-break: keep-all;
+    word-wrap: normal;
+
+    &.loading-submit:after {
+        spinner('loading'); /* needs to come first so we can override the margin */
+
+        content: "";
+        display: inline-block;
+        hidetext();
+        margin: 0 0 0 10px;
+        outline: 0;
+        vertical-align: middle;
+    }
 }
 
 // On hover the settings gear icon should turn blue.
@@ -494,14 +539,6 @@ main {
             height: 70px;
             margin-left: -60px;
             width: 110px;
-            &:after {
-                border: 38px solid transparent;
-                border-bottom-color: $grey-gardens-gray;
-                display: block;
-                position: absolute;
-                right: -18px;
-                top: 0;
-            }
         }
     }
 
@@ -527,21 +564,6 @@ main {
             background-size: auto 46px;
             max-width: 232px;
             width: 232px;
-        }
-        .persona {
-            display: block;
-        }
-        .act-tray {
-            display: none;
-        }
-    }
-
-    .logged-in .site-header {
-        .act-tray {
-            display: block;
-        }
-        .persona {
-            display: none;
         }
     }
 

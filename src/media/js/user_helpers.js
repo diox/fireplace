@@ -1,5 +1,5 @@
-define('user_helpers', ['settings', 'user', 'utils'],
-       function(settings, user, utils) {
+define('user_helpers', ['settings', 'storage', 'user', 'utils'],
+       function(settings, storage, user, utils) {
 
     var initialArgs = utils.getVars();
 
@@ -28,8 +28,18 @@ define('user_helpers', ['settings', 'user', 'utils'],
                '';
     }
 
+    function dev(_dev) {
+        // On desktop, obey the device_filtering pref (defaults to True if
+        // missing).
+        if (_dev == 'desktop' && storage.getItem('device_filtering') === false) {
+            return null;
+        }
+        return _dev;
+    }
+
     return {
         carrier: carrier,
+        dev: dev,
         region: region,
         set_region_geoip: function(region) {
             region_geoip = region;
