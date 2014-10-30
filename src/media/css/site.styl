@@ -160,13 +160,6 @@ body {
 
 .spinner {
     spinner();
-    &.alt {
-        spinner-alt-image();
-    }
-    &.btn-replace {
-        spinner-abs();
-        top: 24px;
-    }
     &.spaced {
         margin: 70px auto;
     }
@@ -175,13 +168,9 @@ body {
     }
 }
 
-@-webkit-keyframes spin {
-    from { -webkit-transform: rotate(0turn); }
-    to { -webkit-transform: rotate(1turn); }
-}
-@keyframes spin {
-    from { transform: rotate(0turn); }
-    to { transform: rotate(1turn); }
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(359deg); }
 }
 
 .roll {

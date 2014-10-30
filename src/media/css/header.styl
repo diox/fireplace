@@ -256,12 +256,20 @@ body {
 
         &.loading-submit {
             box-shadow: none;
-            // Make text transparent to keep the width the same.
+            // Make text and background transparent to keep the width the same.
+            background: transparent;
             color: transparent;
             outline: 0;
-            spinner('loading');
             margin-left: 15px;
+            position: relative;
             width: auto;
+            spinner();
+            &:before {
+                height: 20px;
+                position: absolute;
+                top: 0;
+                width: 20px;
+            }
             &:after {
                 display: none;
             }

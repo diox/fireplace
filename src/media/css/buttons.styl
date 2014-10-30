@@ -152,10 +152,9 @@ commonprops($colour, $shadow) {
     &.loading-submit {
         position: relative;
 
-        &:after {
-            content: "";
-            display: block;
-            spinner('absolute alt');
+        &:before {
+            spinner();
+            position: absolute;
             top: 8px;
         }
     }
