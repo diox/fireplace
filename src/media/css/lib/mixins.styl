@@ -107,14 +107,23 @@ appearance-none() {
 }
 
 // Spinner!
-spinner() {
+// FIXME: if we could have this as a class instead of a mixin, it would avoid
+// repetition and keep the CSS smaller.
+spinner(color = '') {
     &:before {
         animation(unquote('rotate 1s linear infinite'));
-        border-bottom: 1px solid $spinner-gray;
         border-radius: 100%;
-        border-top: 3px solid $spinner-dark-gray;
-        border-left: 2px solid $spinner-dark-gray;
-        border-right: 2px solid $spinner-gray;
+        if (color == 'blue') {
+            border-bottom: 2px solid $spinner-light-blue;
+            border-top: 2px solid $spinner-dark-blue;
+            border-left: 2px solid $spinner-light-blue;
+            border-right: 2px solid $spinner-blue;
+        } else {
+            border-bottom: 2px solid $spinner-light-gray;
+            border-top: 2px solid $spinner-dark-gray;
+            border-left: 2px solid $spinner-light-gray;
+            border-right: 2px solid $spinner-gray;
+        }
         content: '';
         display: block;
         height: 30px;
