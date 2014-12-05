@@ -18,6 +18,7 @@ define('routes_api', [], function() {
         'feedback': '/api/v2/account/feedback/',
         'fxa-login': '/api/v2/account/fxa-login/',
         'installed': '/api/v2/account/installed/mine/',
+        'installed-remove-app': '/api/v2/account/installed/mine/remove_app/',
         'login': '/api/v2/account/login/',
         'logout': '/api/v2/account/logout/',
         // New / Popular pages use a regular search API call, but we need

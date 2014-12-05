@@ -40,10 +40,15 @@
           {{ app.price_locale if app.payment_required else _('Free') }}
         </div>
 
-        {% if app.slug %}
+        {% if app.slug and app.id %}
           {{ market_button(app,
                            data_attrs={'manifest_url': app.manifest_url,
                            'slug': app.slug}) }}
+          {% if src == 'myapps' %}
+            <button class="button t cancel remove-from-list" data-id="{{ app.id }}">
+              {{ _('Remove from my list') }}
+            </button>
+          {% endif %}
         {% endif %}
 
         {{ rating_link() if not is_detail }}
