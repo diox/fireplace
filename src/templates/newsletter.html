@@ -1,0 +1,33 @@
+<div id="newsletter-footer" class="newsletter">
+  <form class="c" method="post">
+    <h3>{{ _('Get Firefox news! Sign up for our newsletter') }}</h3>
+    <input type="email" class="email" name="email" placeholder="E-Mail" required>
+    <button class="button s">{{ _('Sign me up') }}</button>
+    <div id="newsletter-details">
+        <select name="region" placeholder="">
+          {% for code, region in REGIONS.items() %}
+            {% if code != 'None' %}
+              <option value="{{ code }}"{{ ' selected' if code == user_region }}>
+                {{ region }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      <div class="privacy">
+        <label>
+          <input type="checkbox" name="privacy" required>
+          {{ _("I'm okay with Mozilla handling my info as explained in <a href=\"{privacy_policy_url}\" target=\"_blank\">this Privacy Policy</a>",
+               privacy_policy_url='https://www.mozilla.org/privacy/') }}</label>
+      </div>
+    </div>
+  </form>
+  <div class="processing">
+    <span class="spinner alt"></span>
+  </div>
+  <div class="success">
+    <h3>{{ _('Thanks for signing up!') }}</h3>
+    <p>
+      <strong>{{ _('Please check your inbox to confirm your subscription.') }}</strong>
+    </p>
+    <p>{{ _("You'll receive an email from mozilla@mozilla.org to confirm your subscription. If you don’t see it, check your spam filter. You must confirm your subscription to receive our newsletter.") }}</p>
+  </div>
+</div>
