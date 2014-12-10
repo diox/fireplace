@@ -6,6 +6,8 @@
   {% set current_page = 'settings' %}
 
   <form class="form-grid account-settings"{{ ' novalidate' if not user.logged_in() }}>
+    <h3>{{ _('General settings') }}</h3>
+
     <div class="simple-field c only-logged-in">
       <div class="form-label label">{{ _('Email') }}</div>
       <div class="form-col">
@@ -39,6 +41,18 @@
           {{ _('Yes, show me recommendations based on my installed apps. (<a href="{url}" target="_blank">Learn more</a>)')|format(url='https://support.mozilla.org/kb/recommendations-marketplace') }}
         </label>
       </div>
+    </div>
+
+    <h3>{{ _('Newsletter') }}</h3>
+
+    <div class="brform simple-field c full-width newsletter-info">
+      <p>
+        {{ _('Get Firefox News') }}.
+        <a href="#" class="signup">{{ _('Sign up for our newsletter.') }}</a>
+      </p>
+      <p>
+        {{ _('If you have already signed up, you can <a href="{url}" target="_blank">change your newsletter preferences</a>.', url='https://www.mozilla.org/en-US/newsletter/existing/cfa06343-b2e5-4c33-9132-b2b95b21166e/') }}
+      </p>
     </div>
 
     <footer>
