@@ -72,23 +72,15 @@ define('utils_local',
             online(def);
             return def.promise();
         }
-        try {
-            if (navigator.mozTCPSocket === null) {
-                return checkOnlineDesktop();
-            }
-            logger.log('Checking online state with socket');
-            var host = (new URL(urls.cdn_url())).host;
-            var port = 80;
-            var socket = navigator.mozTCPSocket.open(host, port);
-            socket.onerror = function(e) {
-                offline(def, socket);
-            };
-            socket.onopen = function(e) {
-                online(def, socket);
-            };
-        } catch (e) {
-            return checkOnlineDesktop();
-        }
+        
+        var i = new Image();
+        i.src = urls.media('fireplace/img/online-status-beacon.gif') + '?' + (+new Date());
+        i.onload = function() {
+            online(def);
+        };
+        i.onerror = function(e) {
+            offline(def);
+        };
 
         return def.promise();
     }
@@ -96,14 +88,7 @@ define('utils_local',
     function checkOnlineDesktop() {
         var def = defer.Deferred();
 
-        var i = new Image();
-        i.src = 'https://marketplace.cdn.mozilla.net/media/fireplace/img/online-status-beacon.gif?' + (+new Date());
-        i.onload = function() {
-            online(def);
-        };
-        i.onerror = function(e) {
-            offline(def);
-        };
+        
 
         return def.promise();
     }
